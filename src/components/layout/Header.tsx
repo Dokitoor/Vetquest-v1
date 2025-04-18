@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signInWithGoogle, signOut } = useAuth();
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md">
       <nav className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            {/* Replace with your logo */}
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-purple-700 text-transparent bg-clip-text">
               VetQuest
             </span>
@@ -29,9 +29,26 @@ export default function Header() {
             <Link href="/multiplayer" className="text-gray-600 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400">
               Multiplayer
             </Link>
-            <button className="btn-primary">
-              Sign In with Google
-            </button>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-600 dark:text-gray-300">
+                  {user.displayName || user.email}
+                </span>
+                <button 
+                  onClick={() => signOut()}
+                  className="text-gray-600 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => signInWithGoogle()}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md"
+              >
+                Sign In with Google
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -81,9 +98,26 @@ export default function Header() {
             >
               Multiplayer
             </Link>
-            <button className="btn-primary w-full">
-              Sign In with Google
-            </button>
+            {user ? (
+              <>
+                <div className="text-gray-600 dark:text-gray-300">
+                  {user.displayName || user.email}
+                </div>
+                <button 
+                  onClick={() => signOut()}
+                  className="block w-full text-left text-gray-600 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={() => signInWithGoogle()}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md w-full"
+              >
+                Sign In with Google
+              </button>
+            )}
           </div>
         )}
       </nav>
