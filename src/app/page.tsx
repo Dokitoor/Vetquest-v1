@@ -1,7 +1,11 @@
-import Image from 'next/image';
+'use client';
+
+import { useAuth } from '@/features/auth/AuthProvider';
 import Link from 'next/link';
 
 export default function Home() {
+  const { signInWithGoogle } = useAuth();
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -15,8 +19,10 @@ export default function Home() {
               Interactive quizzes, daily case studies, and multiplayer learning experiences
               designed specifically for veterinary professionals and students.
             </p>
-            <button className="bg-white text-purple-600 px-8 py-3 rounded-full text-lg font-semibold
-              hover:bg-gray-100 transition-colors duration-300">
+            <button 
+              onClick={signInWithGoogle}
+              className="bg-white text-purple-600 px-8 py-3 rounded-full text-lg font-semibold
+                hover:bg-gray-100 transition-colors duration-300">
               Get Started with Google
             </button>
           </div>
@@ -95,7 +101,9 @@ export default function Home() {
             Join our community of veterinary professionals and students.
             Start learning, competing, and growing together!
           </p>
-          <button className="btn-primary text-lg">
+          <button 
+            onClick={signInWithGoogle} 
+            className="btn-primary text-lg">
             Sign Up Now
           </button>
         </div>
