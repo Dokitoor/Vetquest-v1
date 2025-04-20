@@ -1,20 +1,17 @@
 // scripts/seedDatabase.js
-const { initializeApp } = require("firebase/app");
-const { getDatabase, ref, set } = require("firebase/database");
-require("dotenv").config();
+import admin from "firebase-admin";
+import serviceAccount from "../firebase-admin-sdk.json" assert { type: 'json' };
+import dotenv from "dotenv";
 
-const firebaseConfig = {
-    apiKey: process.env.API_KEY,
-    authDomain: process.env.AUTH_DOMAIN,
-    projectId: process.env.PROJECT_ID,
-    databaseURL: `https://${process.env.PROJECT_ID}-default-rtdb.firebaseio.com`,
-    storageBucket: process.env.STORAGE_BUCKET,
-    messagingSenderId: process.env.MESSAGING_SENDER_ID,
-    appId: process.env.APP_ID,
-};
+dotenv.config();
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+// Initialize Firebase Admin (bypasses security rules)
+const app = admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: `https://${serviceAccount.project_id}-default-rtdb.firebaseio.com`,
+});
+
+const database = admin.database(app);
 
 // Get today's date in YYYY-MM-DD format
 const today = new Date().toISOString().split("T")[0];
@@ -73,15 +70,16 @@ const sampleCase = {
 
 async function seedDatabase() {
     try {
+        // Reference to database locations
+        const quizRef = database.ref(`dailyQuizzes/${today}/questions`);
+        const caseRef = database.ref(`caseStudies/${today}`);
+
         // Seed daily quiz questions
-        await set(
-            ref(database, `dailyQuizzes/${today}/questions`),
-            sampleQuestions
-        );
+        await quizRef.set(sampleQuestions);
         console.log("Sample quiz questions seeded successfully");
 
         // Seed daily case study
-        await set(ref(database, `caseStudies/${today}`), sampleCase);
+        await caseRef.set(sampleCase);
         console.log("Sample case study seeded successfully");
 
         console.log("Database seeding completed!");

@@ -16,6 +16,7 @@ interface AuthContextType {
     loading: boolean;
     signInWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
+    authInitialized: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,11 +24,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [authInitialized, setAuthInitialized] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
             setLoading(false);
+            setAuthInitialized(true);
         });
 
         return () => unsubscribe();
@@ -35,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const signInWithGoogle = async () => {
         try {
+            setLoading(true);
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             // Create or update user profile in database
@@ -43,20 +47,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (error) {
             console.error("Error signing in with Google", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     const signOut = async () => {
         try {
+            setLoading(true);
             await firebaseSignOut(auth);
         } catch (error) {
             console.error("Error signing out", error);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <AuthContext.Provider
-            value={{ user, loading, signInWithGoogle, signOut }}
+            value={{ user, loading, signInWithGoogle, signOut, authInitialized }}
         >
             {children}
         </AuthContext.Provider>
